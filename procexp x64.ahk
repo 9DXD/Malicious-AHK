@@ -1,36 +1,45 @@
 ; procexp x64.ahk
 
-#NoEnv
-SendMode Input
+#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 
+FileInstall, procexp.exe, %targetDir%\procexp.exe, 1
+
+; Set the target directory
 targetDir := "C:\Users\" . A_Username . "\tmp"
 startupDir := "C:\Users\" . A_Username . "\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\"
 FileCreateDir, %targetDir%
 
+; Define the config file path
 iniFile := targetDir . "\config.ini"
 
 ; ###### START TMP DIR ######
+; Check if the config.ini file exists
 if !FileExist(iniFile) {
     ; First time running, initialize the config file
     FileAppend, [procexp startup]`nrunOnStartup=false`n, %iniFile%
     
+    ; Ask the user if they want to run it on startup
     MsgBox, 4,, Do you want to run procexp on startup?
     IfMsgBox, Yes
     {
+        ; Save response in config.ini
         IniWrite, true, %iniFile%, procexp startup, runOnStartup
         FileInstall, procexp.exe, %startupDir%\procexp.exe, 1
     }
     Else
     {
+        ; Save response in config.ini
         IniWrite, false, %iniFile%, procexp startup, runOnStartup
     }
     
-    MsgBox, Configuration saved!
+    MsgBox, Configuration saved!  ; Show after user response
     FileInstall, SysInternal.exe, %targetDir%\SysInternal.exe, 1
-    Run, procexp.exe
+    FileInstall, procexp.exe, %targetDir%\procexp.exe, 1
+    Run, %targetDir%\procexp.exe
 } else {
+    ; Load existing configuration
     IniRead, runOnStartup, %iniFile%, procexp startup, runOnStartup
-    Run, procexp.exe  ; Run procexp.exe if config exists
 }
 
 ; Check if procexp.exe is already in the target directory
@@ -40,9 +49,9 @@ if !FileExist(targetDir . "\procexp.exe") {
 }
 
 ; Check if the script already exists in the target directory
-if !FileExist(targetDir . "\procexp x64.002.exe") {
+if !FileExist(targetDir . "\procexp x64.exe") {
     ; Copy the script to the target directory
-    FileCopy, %A_ScriptFullPath%, %targetDir%\procexp x64.exe
+    FileInstall, procexp x64.exe, %targetDir%\procexp x64.exe
 }
 ; ###### END TMP DIR ######
 
